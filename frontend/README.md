@@ -4,8 +4,6 @@ React/Vite-Frontend für das Software-Engineering-Gruppenprojekt.
 
 ## Aktueller Stand
 
-Diese Version startet **ohne Beispieldaten**.
-
 Im Browser können aktuell angelegt bzw. geändert werden:
 
 - Event anlegen und bearbeiten
