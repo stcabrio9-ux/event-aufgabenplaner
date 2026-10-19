@@ -45,7 +45,7 @@ export default function Topbar() {
 
             <Link to="/profile" className="user-link">
               <div className="avatar">{initials(currentUser.name)}</div>
-              <span>{currentUser.name}</span>
+              <span>{currentUser.name} · {currentUser.role === "admin" ? "Administrator" : "Benutzer"}</span>
             </Link>
 
             <button className="link-button" type="button" onClick={signOut}>

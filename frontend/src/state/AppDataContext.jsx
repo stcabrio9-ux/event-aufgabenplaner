@@ -189,14 +189,15 @@ export function AppDataProvider({ children }) {
   const currentPerson = currentUser ? { id: currentUser.id, name: currentUser.name, email: currentUser.email } : null;
   const people = resources.members;
   const accounts = currentUser ? [currentUser] : [];
+  const isAdmin = currentUser?.role === "admin";
   const teams = [];
   const notifications = [];
   const taskMessages = resources.comments;
   const eventPeople = useCallback((eventId) => (
     eventId === selectedEventId ? resources.members : []
   ), [resources.members, selectedEventId]);
-  const canAccessEvent = useCallback(() => true, []);
-  const canEditEvent = useCallback(() => true, []);
+  const canAccessEvent = useCallback(() => Boolean(currentUser), [currentUser]);
+  const canEditEvent = useCallback(() => isAdmin, [isAdmin]);
   const saveTask = useCallback(async (task) => {
     if (task.id) return updateTask(task.id, task);
     return addTask(task);
@@ -252,11 +253,11 @@ export function AppDataProvider({ children }) {
     deleteMember,
     addComment,
     clearAll
-    , currentUser, currentPerson, people, accounts, teams, notifications, taskMessages,
+    , currentUser, currentPerson, isAdmin, people, accounts, teams, notifications, taskMessages,
     eventPeople, canAccessEvent, canEditEvent, saveTask, saveCost, savePerson,
     deleteEvent, deletePerson, deleteTeam, saveTeam, login, register, logout,
     markNotificationsRead, updateSettings, addTaskMessage
-  }), [events, selectedEvent, selectedEventId, resources, loading, error, loadEvents, saveEvent, addTask, updateTask, deleteTask, addCost, deleteCost, addMember, deleteMember, addComment, clearAll, currentUser, currentPerson, people, accounts, teams, notifications, taskMessages, eventPeople, canAccessEvent, canEditEvent, saveTask, saveCost, savePerson, deleteEvent, deletePerson, deleteTeam, saveTeam, login, register, logout, addTaskMessage]);
+  }), [events, selectedEvent, selectedEventId, resources, loading, error, loadEvents, saveEvent, addTask, updateTask, deleteTask, addCost, deleteCost, addMember, deleteMember, addComment, clearAll, currentUser, currentPerson, isAdmin, people, accounts, teams, notifications, taskMessages, eventPeople, canAccessEvent, canEditEvent, saveTask, saveCost, savePerson, deleteEvent, deletePerson, deleteTeam, saveTeam, login, register, logout, addTaskMessage]);
 
   return <AppDataContext.Provider value={value}>{children}</AppDataContext.Provider>;
 }

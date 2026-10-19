@@ -5,7 +5,7 @@ import { formatDateRange } from "../utils/format";
 
 export default function EventManagementLayout() {
   const { eventId } = useParams();
-  const { events, tasks, canAccessEvent } = useAppData();
+  const { events, tasks, canAccessEvent, isAdmin } = useAppData();
   const event = events.find((item) => item.id === eventId);
 
   if (!event) return <Navigate to="/events" replace />;
@@ -26,8 +26,8 @@ export default function EventManagementLayout() {
           <nav className="main-navigation management-nav">
             <NavLink end to={base} className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}>Übersicht</NavLink>
             <NavLink to={`${base}/tasks`} className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}>Aufgaben</NavLink>
-            <NavLink to={`${base}/costs`} className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}>Kosten</NavLink>
-            <NavLink to={`${base}/people`} className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}>Teams & Personen</NavLink>
+            {isAdmin ? <NavLink to={`${base}/costs`} className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}>Kosten</NavLink> : null}
+            {isAdmin ? <NavLink to={`${base}/people`} className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}>Teams & Personen</NavLink> : null}
           </nav>
           <div className="event-preview">
             <span className="sidebar-label">Aktuelles Event</span>

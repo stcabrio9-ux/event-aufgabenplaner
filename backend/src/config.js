@@ -8,7 +8,10 @@ export const config = {
   authSecret: process.env.AUTH_SECRET,
   adminEmail: process.env.ADMIN_EMAIL,
   adminPassword: process.env.ADMIN_PASSWORD,
-  adminName: process.env.ADMIN_NAME || "Administrator"
+  adminName: process.env.ADMIN_NAME || "Administrator",
+  userEmail: process.env.USER_EMAIL,
+  userPassword: process.env.USER_PASSWORD,
+  userName: process.env.USER_NAME || "Benutzer"
 };
 
 export function validateDatabaseUrl() {

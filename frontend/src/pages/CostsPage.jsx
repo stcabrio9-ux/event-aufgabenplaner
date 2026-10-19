@@ -9,7 +9,7 @@ import { formatMoney } from "../utils/format";
 
 export default function CostsPage() {
   const { event } = useOutletContext();
-  const { costs, tasks, saveCost, deleteCost } = useAppData();
+  const { costs, tasks, isAdmin, saveCost, deleteCost } = useAppData();
   const [modal, setModal] = useState(null);
   const removeCost = (id) => {
     if (window.confirm("Kostenposition wirklich löschen? Dieser Vorgang kann nicht rückgängig gemacht werden.")) deleteCost(id);
@@ -27,7 +27,7 @@ export default function CostsPage() {
         eyebrow={event.name}
         title="Kosten"
         meta={<span>Kostenpositionen erfassen, bearbeiten und mit Aufgaben verknüpfen</span>}
-        action={<button className="button primary" onClick={() => setModal({})}>+ Kosten erfassen</button>}
+        action={isAdmin ? <button className="button primary" onClick={() => setModal({})}>+ Kosten erfassen</button> : null}
       />
 
       <main className="page-content">
@@ -66,8 +66,8 @@ export default function CostsPage() {
                         <td>{cost.note || "—"}</td>
                         <td>{formatMoney(cost.amount)}</td>
                         <td className="table-actions">
-                          <button className="link-button" onClick={() => setModal(cost)}>Bearbeiten</button>
-                          <button className="link-button danger" onClick={() => removeCost(cost.id)}>Löschen</button>
+                          {isAdmin ? <button className="link-button" onClick={() => setModal(cost)}>Bearbeiten</button> : null}
+                          {isAdmin ? <button className="link-button danger" onClick={() => removeCost(cost.id)}>Löschen</button> : null}
                         </td>
                       </tr>
                     );
@@ -84,14 +84,14 @@ export default function CostsPage() {
         )}
       </main>
 
-      <CostModal
+      {isAdmin ? <CostModal
         open={modal !== null}
         cost={modal?.id ? modal : null}
         eventId={event.id}
         tasks={eventTasks}
         onClose={() => setModal(null)}
         onSave={saveCost}
-      />
+      /> : null}
     </>
   );
 }

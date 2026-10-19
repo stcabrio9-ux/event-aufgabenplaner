@@ -7,10 +7,10 @@ import EventModal from "../components/EventModal";
 import { useAppData } from "../state/AppDataContext";
 
 export default function EventsPage() {
-  const { events, teams, people, currentUser, saveEvent } = useAppData();
+  const { events, teams, people, currentUser, isAdmin, saveEvent } = useAppData();
   const [open, setOpen] = useState(false);
 
-  const action = currentUser ? (
+  const action = isAdmin ? (
     <button className="button primary" onClick={() => setOpen(true)}>+ Event erstellen</button>
   ) : (
     <Link className="button primary button-link" to="/login" state={{ from: "/events" }}>
@@ -35,7 +35,7 @@ export default function EventsPage() {
         ) : (
           <EmptyState
             title="Noch keine Events"
-            text={currentUser
+            text={isAdmin
               ? "Erstelle dein erstes Event mit Beschreibung, Zeitraum, Foto und Teilnehmern."
               : "Sobald registrierte Nutzer Events anlegen, erscheinen sie hier."}
             action={action}
@@ -43,7 +43,7 @@ export default function EventsPage() {
         )}
       </main>
 
-      {currentUser ? (
+      {isAdmin ? (
         <EventModal
           open={open}
           teams={teams}

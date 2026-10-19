@@ -45,7 +45,7 @@ Statuswerte sind `Offen`, `In Bearbeitung` und `Erledigt`; Prioritäten `Niedrig
 
 Ein Railway-PostgreSQL-Service stellt `DATABASE_URL` bereit. Diese Variable zusammen mit `NODE_ENV=production`, `PORT` (falls Railway ihn vorgibt) und `FRONTEND_URL` im Backend-Service konfigurieren. Anschließend im Deploy- oder Release-Schritt `npm run migrate` ausführen und als Startkommando `npm start` verwenden. In Produktion aktiviert der Pool TLS für PostgreSQL.
 
-Für die Prototyp-Anmeldung zusätzlich `AUTH_SECRET`, `ADMIN_EMAIL`, `ADMIN_PASSWORD` und optional `ADMIN_NAME` als Railway-Variablen setzen. Nach der Migration einmal `npm run seed-admin` als Release-/Deploy-Schritt ausführen. Das Passwort wird dabei nur gehasht in PostgreSQL gespeichert.
+Für die Prototyp-Anmeldung zusätzlich `AUTH_SECRET`, `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `ADMIN_NAME`, `USER_EMAIL`, `USER_PASSWORD` und `USER_NAME` als Railway-Variablen setzen. Nach der Migration einmal `npm run seed-admin` als Release-/Deploy-Schritt ausführen. Das Seeding ist wiederholbar, legt einen Administrator (`admin`) und einen normalen Benutzer (`user`) an und speichert Passwörter ausschließlich gehasht in PostgreSQL.
 
 ## Tests
 

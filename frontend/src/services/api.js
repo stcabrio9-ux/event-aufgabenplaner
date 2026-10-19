@@ -23,6 +23,10 @@ async function request(path, options = {}) {
   }
 
   if (!response.ok) {
+    if (response.status === 401) {
+      sessionStorage.removeItem("event-planner-auth-token");
+      if (window.location.pathname !== "/login") window.location.assign("/login");
+    }
     const error = new Error(
       payload?.error?.message ?? `API-Fehler: ${response.status}`
     );

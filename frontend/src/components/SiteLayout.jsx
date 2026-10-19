@@ -3,11 +3,11 @@ import Topbar from "./Topbar";
 import { useAppData } from "../state/AppDataContext";
 
 export default function SiteLayout() {
-  const { currentUser } = useAppData();
+  const { currentUser, isAdmin, error, clearError } = useAppData();
   const nav = [
     { to: "/", label: "Startseite", end: true },
     { to: "/events", label: "Events" },
-    ...(currentUser
+    ...(currentUser && isAdmin
       ? [
           { to: "/my-events", label: "Meine Events" },
           { to: "/teams-people", label: "Teams & Personen" }
@@ -33,7 +33,10 @@ export default function SiteLayout() {
             ))}
           </nav>
         </aside>
-        <div className="content"><Outlet /></div>
+        <div className="content">
+          {error ? <div className="form-error" role="alert">{error}<button className="link-button" type="button" onClick={clearError}>Schließen</button></div> : null}
+          <Outlet />
+        </div>
       </div>
     </div>
   );

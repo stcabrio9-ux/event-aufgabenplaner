@@ -70,3 +70,12 @@ export function authUser(req, _res, next) {
 export function revokeToken(token) {
   if (token) revokedTokens.add(token);
 }
+
+export function requireRole(...roles) {
+  return (req, _res, next) => {
+    if (!req.user || !roles.includes(req.user.role)) {
+      return next(new AppError("Für diese Aktion fehlen die erforderlichen Rechte.", 403, "FORBIDDEN"));
+    }
+    return next();
+  };
+}
