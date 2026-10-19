@@ -6,6 +6,7 @@ import { config } from "../config.js";
 
 const scrypt = promisify(scryptCallback);
 const TOKEN_TTL_SECONDS = 60 * 60 * 24;
+const revokedTokens = new Set();
 
 export async function hashPassword(password) {
   const salt = randomBytes(16).toString("hex");
@@ -41,7 +42,8 @@ export function readToken(token) {
   if (!payload || !signature || sign(payload) !== signature) return null;
   try {
     const data = JSON.parse(Buffer.from(payload, "base64url").toString("utf8"));
-    return data.exp > Math.floor(Date.now() / 1000) ? data : null;
+    if (revokedTokens.has(token) || data.exp <= Math.floor(Date.now() / 1000)) return null;
+    return { ...data, id: data.sub };
   } catch {
     return null;
   }
@@ -61,5 +63,10 @@ export function authUser(req, _res, next) {
   const user = readToken(token);
   if (!user) return next(new AppError("Anmeldung erforderlich.", 401, "UNAUTHORIZED"));
   req.user = user;
+  req.authToken = token;
   return next();
+}
+
+export function revokeToken(token) {
+  if (token) revokedTokens.add(token);
 }

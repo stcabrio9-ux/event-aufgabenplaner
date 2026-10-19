@@ -17,6 +17,12 @@ test("Login validiert fehlende Zugangsdaten ohne Datenbankzugriff", async () => 
   assert.equal(response.body.error.code, "VALIDATION_ERROR");
 });
 
+test("Geschützte Auth-Endpunkte verlangen ein gültiges Token", async () => {
+  const response = await request(app).get("/api/auth/me");
+  assert.equal(response.status, 401);
+  assert.equal(response.body.error.code, "UNAUTHORIZED");
+});
+
 test("GET /api/health liefert den API-Status", async () => {
   const response = await request(app).get("/api/health");
   assert.equal(response.status, 200);
