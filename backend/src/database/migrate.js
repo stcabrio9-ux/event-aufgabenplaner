@@ -2,10 +2,12 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { pool } from "./pool.js";
+import { validateDatabaseUrl } from "../config.js";
 
 const directory = path.dirname(fileURLToPath(import.meta.url));
 
 async function migrate() {
+  validateDatabaseUrl();
   await pool.query(`
     CREATE TABLE IF NOT EXISTS schema_migrations (
       name text PRIMARY KEY,
@@ -22,15 +24,18 @@ async function migrate() {
     if (applied.rowCount) continue;
 
     const sql = await fs.readFile(path.join(directory, "migrations", file), "utf8");
-    await pool.query("BEGIN");
+    const client = await pool.connect();
     try {
-      await pool.query(sql);
-      await pool.query("INSERT INTO schema_migrations (name) VALUES ($1)", [file]);
-      await pool.query("COMMIT");
+      await client.query("BEGIN");
+      await client.query(sql);
+      await client.query("INSERT INTO schema_migrations (name) VALUES ($1)", [file]);
+      await client.query("COMMIT");
       console.log(`Applied ${file}`);
     } catch (error) {
-      await pool.query("ROLLBACK");
+      await client.query("ROLLBACK");
       throw error;
+    } finally {
+      client.release();
     }
   }
 }

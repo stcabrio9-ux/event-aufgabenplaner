@@ -20,3 +20,42 @@ test("unbekannte Routen liefern den zentralen Fehler", async () => {
   assert.equal(response.status, 404);
   assert.equal(response.body.error.code, "NOT_FOUND");
 });
+
+test("Ressourcenrouten validieren Event-IDs vor dem Datenbankzugriff", async () => {
+  const routes = [
+    "/api/events/not-a-uuid/tasks",
+    "/api/events/not-a-uuid/members",
+    "/api/events/not-a-uuid/costs",
+    "/api/events/not-a-uuid/comments"
+  ];
+
+  for (const route of routes) {
+    const response = await request(app).get(route);
+    assert.equal(response.status, 400, route);
+    assert.equal(response.body.error.code, "VALIDATION_ERROR", route);
+  }
+});
+
+test("Ressourcenrouten validieren Ressourcen-IDs vor dem Datenbankzugriff", async () => {
+  const routes = [
+    ["patch", "/api/tasks/not-a-uuid"],
+    ["delete", "/api/tasks/not-a-uuid"],
+    ["delete", "/api/members/not-a-uuid"],
+    ["delete", "/api/costs/not-a-uuid"]
+  ];
+
+  for (const [method, route] of routes) {
+    const response = await request(app)[method](route).send({});
+    assert.equal(response.status, 400, `${method.toUpperCase()} ${route}`);
+    assert.equal(response.body.error.code, "VALIDATION_ERROR", `${method.toUpperCase()} ${route}`);
+  }
+});
+
+test("Aufgaben mit leerem Fälligkeitsdatum werden abgelehnt", async () => {
+  const response = await request(app)
+    .post("/api/events/00000000-0000-0000-0000-000000000000/tasks")
+    .send({ title: "Aufgabe", dueDate: "" });
+
+  assert.equal(response.status, 400);
+  assert.equal(response.body.error.code, "VALIDATION_ERROR");
+});

@@ -9,9 +9,12 @@ const initialForm = {
 
 export default function NewTaskModal({ open, members, onClose, onCreate }) {
   const [form, setForm] = useState(initialForm);
+  const [saving, setSaving] = useState(false);
+  const [submitError, setSubmitError] = useState(null);
 
   useEffect(() => {
     if (open) {
+      setSubmitError(null);
       setForm({
         ...initialForm,
         owner: members[0]?.name ?? ""
@@ -26,16 +29,25 @@ export default function NewTaskModal({ open, members, onClose, onCreate }) {
     setForm((current) => ({ ...current, [name]: value }));
   }
 
-  function submit(event) {
+  async function submit(event) {
     event.preventDefault();
-    if (!form.title.trim()) return;
+    if (saving || !form.title.trim()) return;
 
-    onCreate({
-      ...form,
-      title: form.title.trim(),
-      status: "Offen"
-    });
-    onClose();
+    setSaving(true);
+    setSubmitError(null);
+    try {
+      await onCreate({
+        ...form,
+        title: form.title.trim(),
+        dueDate: form.dueDate || null,
+        status: "Offen"
+      });
+      onClose();
+    } catch (requestError) {
+      setSubmitError(requestError.message);
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (
@@ -46,7 +58,7 @@ export default function NewTaskModal({ open, members, onClose, onCreate }) {
             <span className="eyebrow">Aufgabenverwaltung</span>
             <h2>Neue Aufgabe</h2>
           </div>
-          <button className="icon-button" type="button" onClick={onClose}>×</button>
+          <button className="icon-button" type="button" onClick={onClose} disabled={saving}>×</button>
         </div>
 
         <form onSubmit={submit} className="form-grid">
@@ -56,6 +68,7 @@ export default function NewTaskModal({ open, members, onClose, onCreate }) {
               name="title"
               value={form.title}
               onChange={update}
+              disabled={saving}
               placeholder="z. B. Catering buchen"
               autoFocus
             />
@@ -63,7 +76,7 @@ export default function NewTaskModal({ open, members, onClose, onCreate }) {
 
           <label className="field">
             <span>Verantwortlich</span>
-            <select name="owner" value={form.owner} onChange={update}>
+            <select name="owner" value={form.owner} onChange={update} disabled={saving}>
               <option value="">Nicht zugewiesen</option>
               {members.map((member) => (
                 <option key={member.id} value={member.name}>{member.name}</option>
@@ -73,7 +86,7 @@ export default function NewTaskModal({ open, members, onClose, onCreate }) {
 
           <label className="field">
             <span>Priorität</span>
-            <select name="priority" value={form.priority} onChange={update}>
+            <select name="priority" value={form.priority} onChange={update} disabled={saving}>
               <option>Niedrig</option>
               <option>Mittel</option>
               <option>Hoch</option>
@@ -82,12 +95,13 @@ export default function NewTaskModal({ open, members, onClose, onCreate }) {
 
           <label className="field full">
             <span>Frist</span>
-            <input type="date" name="dueDate" value={form.dueDate} onChange={update} />
+            <input type="date" name="dueDate" value={form.dueDate} onChange={update} disabled={saving} />
           </label>
 
           <div className="modal-actions full">
-            <button className="button secondary" type="button" onClick={onClose}>Abbrechen</button>
-            <button className="button primary" type="submit">Aufgabe erstellen</button>
+            {submitError ? <p role="alert">{submitError}</p> : null}
+            <button className="button secondary" type="button" onClick={onClose} disabled={saving}>Abbrechen</button>
+            <button className="button primary" type="submit" disabled={saving}>{saving ? "Wird erstellt …" : "Aufgabe erstellen"}</button>
           </div>
         </form>
       </section>

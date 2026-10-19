@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function MemberModal({ open, onClose, onCreate }) {
   const [form, setForm] = useState({
@@ -6,6 +6,12 @@ export default function MemberModal({ open, onClose, onCreate }) {
     projectRole: "",
     accessRole: "Betrachter"
   });
+  const [saving, setSaving] = useState(false);
+  const [submitError, setSubmitError] = useState(null);
+
+  useEffect(() => {
+    if (open) setSubmitError(null);
+  }, [open]);
 
   if (!open) return null;
 
@@ -14,18 +20,25 @@ export default function MemberModal({ open, onClose, onCreate }) {
     setForm((current) => ({ ...current, [name]: value }));
   }
 
-  function submit(event) {
+  async function submit(event) {
     event.preventDefault();
-    if (!form.name.trim()) return;
+    if (saving || !form.name.trim()) return;
 
-    onCreate({
-      ...form,
-      name: form.name.trim(),
-      projectRole: form.projectRole.trim()
-    });
-
-    setForm({ name: "", projectRole: "", accessRole: "Betrachter" });
-    onClose();
+    setSaving(true);
+    setSubmitError(null);
+    try {
+      await onCreate({
+        ...form,
+        name: form.name.trim(),
+        projectRole: form.projectRole.trim()
+      });
+      setForm({ name: "", projectRole: "", accessRole: "Betrachter" });
+      onClose();
+    } catch (requestError) {
+      setSubmitError(requestError.message);
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (
@@ -36,23 +49,23 @@ export default function MemberModal({ open, onClose, onCreate }) {
             <span className="eyebrow">Mitglieder</span>
             <h2>Mitglied hinzufügen</h2>
           </div>
-          <button className="icon-button" type="button" onClick={onClose}>×</button>
+          <button className="icon-button" type="button" onClick={onClose} disabled={saving}>×</button>
         </div>
 
         <form className="form-grid" onSubmit={submit}>
           <label className="field full">
             <span>Name</span>
-            <input name="name" value={form.name} onChange={update} placeholder="Vor- und Nachname" autoFocus />
+            <input name="name" value={form.name} onChange={update} placeholder="Vor- und Nachname" autoFocus disabled={saving} />
           </label>
 
           <label className="field">
             <span>Projektrolle</span>
-            <input name="projectRole" value={form.projectRole} onChange={update} placeholder="z. B. Frontend" />
+            <input name="projectRole" value={form.projectRole} onChange={update} placeholder="z. B. Frontend" disabled={saving} />
           </label>
 
           <label className="field">
             <span>Zugriffsrolle</span>
-            <select name="accessRole" value={form.accessRole} onChange={update}>
+            <select name="accessRole" value={form.accessRole} onChange={update} disabled={saving}>
               <option>Betrachter</option>
               <option>Bearbeiter</option>
               <option>Administrator</option>
@@ -60,8 +73,9 @@ export default function MemberModal({ open, onClose, onCreate }) {
           </label>
 
           <div className="modal-actions full">
-            <button className="button secondary" type="button" onClick={onClose}>Abbrechen</button>
-            <button className="button primary" type="submit">Hinzufügen</button>
+            {submitError ? <p role="alert">{submitError}</p> : null}
+            <button className="button secondary" type="button" onClick={onClose} disabled={saving}>Abbrechen</button>
+            <button className="button primary" type="submit" disabled={saving}>{saving ? "Wird hinzugefügt …" : "Hinzufügen"}</button>
           </div>
         </form>
       </section>

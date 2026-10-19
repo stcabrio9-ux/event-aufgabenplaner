@@ -41,7 +41,11 @@ export default function TaskTable({ tasks, onStatusChange, onDelete }) {
               <td>{formatDate(task.dueDate)}</td>
               {onDelete ? (
                 <td className="table-actions">
-                  <button className="link-button danger" type="button" onClick={() => onDelete(task.id)}>
+                  <button className="link-button danger" type="button" onClick={() => {
+                    if (window.confirm(`Möchtest du die Aufgabe „${task.title}" wirklich löschen?`)) {
+                      void Promise.resolve(onDelete(task.id)).catch(() => {});
+                    }
+                  }}>
                     Löschen
                   </button>
                 </td>

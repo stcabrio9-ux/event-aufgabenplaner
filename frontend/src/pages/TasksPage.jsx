@@ -29,7 +29,7 @@ export default function TasksPage() {
           <section className="card">
             <TaskTable
               tasks={tasks}
-              onStatusChange={(id, status) => updateTask(id, { status })}
+              onStatusChange={(id, status) => void updateTask(id, { status }).catch(() => {})}
               onDelete={deleteTask}
             />
           </section>

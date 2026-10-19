@@ -40,7 +40,11 @@ export default function MembersPage() {
 
                 <div className="member-actions">
                   <StatusBadge>{member.accessRole}</StatusBadge>
-                  <button className="link-button danger" type="button" onClick={() => deleteMember(member.id)}>
+                  <button className="link-button danger" type="button" onClick={() => {
+                    if (window.confirm(`Möchtest du das Mitglied „${member.name}" wirklich löschen?`)) {
+                      void deleteMember(member.id).catch(() => {});
+                    }
+                  }}>
                     Löschen
                   </button>
                 </div>
