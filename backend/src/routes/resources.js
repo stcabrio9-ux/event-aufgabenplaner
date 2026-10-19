@@ -11,5 +11,6 @@ router.patch("/tasks/:id", id, validate(schemas.taskUpdate), asyncHandler(contro
 router.delete("/tasks/:id", id, asyncHandler(controller.taskDelete));
 router.delete("/members/:id", id, asyncHandler(controller.memberDelete));
 router.delete("/costs/:id", id, asyncHandler(controller.costDelete));
+router.patch("/costs/:id", id, validate(schemas.costUpdate), asyncHandler(controller.costUpdate));
 
 export default router;

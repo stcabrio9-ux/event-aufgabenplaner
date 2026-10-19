@@ -12,6 +12,11 @@ export async function createCost(eventId, data) {
   return costRow(requireRow(result, "Event"));
 }
 
+export async function updateCost(id, data) {
+  const result = await query("UPDATE costs SET title = COALESCE($2, title), category = COALESCE($3, category), amount = COALESCE($4, amount) WHERE id = $1 RETURNING *", [id, data.title ?? null, data.category ?? null, data.amount ?? null]);
+  return costRow(requireRow(result, "Kostenposition"));
+}
+
 export async function deleteCost(id) {
   const result = await query("DELETE FROM costs WHERE id = $1", [id]);
   if (!result.rowCount) throw new AppError("Kostenposition nicht gefunden.", 404, "NOT_FOUND");
