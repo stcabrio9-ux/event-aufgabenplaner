@@ -1,53 +1,9 @@
 import { useState } from "react";
+import { Link,useOutletContext } from "react-router-dom";
 import PageHeader from "../components/PageHeader";
 import EmptyState from "../components/EmptyState";
-import TaskTable from "../components/TaskTable";
-import NewTaskModal from "../components/NewTaskModal";
+import TaskModal from "../components/TaskModal";
+import StatusBadge from "../components/StatusBadge";
 import { useAppData } from "../state/AppDataContext";
-
-export default function TasksPage() {
-  const { event, tasks, members, addTask, updateTask, deleteTask } = useAppData();
-  const [open, setOpen] = useState(false);
-
-  return (
-    <>
-      <PageHeader
-        eyebrow={event?.name ?? "Aufgabenverwaltung"}
-        title="Aufgaben"
-        meta={<span>Status, Priorität, Frist und Zuständigkeit verwalten</span>}
-        action={
-          <button className="button primary" type="button" onClick={() => setOpen(true)} disabled={!event}>
-            + Neue Aufgabe
-          </button>
-        }
-      />
-
-      <main className="page-content">
-        {!event ? (
-          <EmptyState title="Zuerst ein Event anlegen" text="Aufgaben werden immer einem Event zugeordnet." />
-        ) : tasks.length ? (
-          <section className="card">
-            <TaskTable
-              tasks={tasks}
-              onStatusChange={(id, status) => void updateTask(id, { status }).catch(() => {})}
-              onDelete={deleteTask}
-            />
-          </section>
-        ) : (
-          <EmptyState
-            title="Noch keine Aufgaben"
-            text="Lege die erste Aufgabe für dieses Event an."
-            action={<button className="button primary" type="button" onClick={() => setOpen(true)}>Aufgabe anlegen</button>}
-          />
-        )}
-      </main>
-
-      <NewTaskModal
-        open={open}
-        members={members}
-        onClose={() => setOpen(false)}
-        onCreate={addTask}
-      />
-    </>
-  );
-}
+import { formatDate, formatMoney } from "../utils/format";
+export default function TasksPage(){const{event}=useOutletContext();const{tasks,costs,eventPeople,people,saveTask,deleteTask}=useAppData();const[modal,setModal]=useState(null);const list=tasks.filter(t=>t.eventId===event.id);const allowed=eventPeople(event.id);const person=id=>people.find(p=>p.id===id)?.name||"Nicht zugewiesen";const taskCost=id=>costs.filter(c=>c.eventId===event.id&&c.taskId===id).reduce((sum,c)=>sum+Number(c.amount),0);return <><PageHeader eyebrow={event.name} title="Aufgaben" meta={<span>Aufgaben verwalten, zuweisen und innerhalb der Aufgabe kommunizieren</span>} action={<button className="button primary" onClick={()=>setModal({})}>+ Aufgabe erstellen</button>}/><main className="page-content">{list.length?<section className="card"><div className="table-scroll"><table className="data-table"><thead><tr><th>Nr.</th><th>Aufgabe</th><th>Status</th><th>Priorität</th><th>Verantwortlich</th><th>Kosten</th><th>Frist</th><th></th></tr></thead><tbody>{list.map(t=><tr key={t.id}><td><Link className="task-key" to={t.id}>{t.key}</Link></td><td><Link className="table-title-link" to={t.id}>{t.title}</Link></td><td><StatusBadge>{t.status}</StatusBadge></td><td><StatusBadge type="priority">{t.priority}</StatusBadge></td><td>{person(t.assigneeId)}</td><td>{taskCost(t.id)?formatMoney(taskCost(t.id)):"—"}</td><td>{formatDate(t.dueDate)}</td><td className="table-actions"><button className="link-button" onClick={()=>setModal(t)}>Bearbeiten</button><button className="link-button danger" onClick={()=>deleteTask(t.id)}>Löschen</button></td></tr>)}</tbody></table></div></section>:<EmptyState title="Noch keine Aufgaben" text="Aufgaben erhalten automatisch eine eindeutige Nummer und können später als Kommunikations-Ticket verwendet werden." action={<button className="button primary" onClick={()=>setModal({})}>Aufgabe erstellen</button>}/>}</main><TaskModal open={modal!==null} task={modal?.id?modal:null} eventId={event.id} people={allowed} onClose={()=>setModal(null)} onSave={saveTask}/></>}
