@@ -14,5 +14,6 @@ export const schemas = {
   taskUpdate: z.object({ title: z.string().trim().min(1).max(240).optional(), status: z.enum(["Offen", "In Bearbeitung", "Erledigt"]).optional(), priority: z.enum(["Niedrig", "Mittel", "Hoch"]).optional(), owner: z.string().trim().max(160).nullable().optional(), dueDate: date.nullable().optional() }).strict().refine((value) => Object.keys(value).length > 0),
   memberCreate: z.object({ name: z.string().trim().min(1).max(160), projectRole: z.string().trim().max(160).nullable().optional(), accessRole: z.enum(["Betrachter", "Bearbeiter", "Administrator"]).default("Betrachter") }),
   costCreate: z.object({ title: z.string().trim().min(1).max(240), category: z.string().trim().min(1).max(120).default("Sonstiges"), amount: z.coerce.number().finite().min(0) }),
+  costUpdate: z.object({ title: z.string().trim().min(1).max(240).optional(), category: z.string().trim().min(1).max(120).optional(), amount: z.coerce.number().finite().min(0).optional() }).strict().refine((value) => Object.keys(value).length > 0),
   commentCreate: z.object({ author: z.string().trim().min(1).max(160).default("Unbekannt"), initials: z.string().trim().min(1).max(10).default("??"), text: z.string().trim().min(1).max(5000) })
 };

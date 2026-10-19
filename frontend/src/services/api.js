@@ -71,6 +71,11 @@ export const api = {
       method: "POST",
       body: JSON.stringify(payload)
     }),
+  updateCost: (costId, payload) =>
+    request(`/costs/${costId}`, {
+      method: "PATCH",
+      body: JSON.stringify(payload)
+    }),
   deleteCost: (costId) => request(`/costs/${costId}`, { method: "DELETE" }),
   getComments: (eventId) => request(`/events/${eventId}/comments`),
   createComment: (eventId, payload) =>

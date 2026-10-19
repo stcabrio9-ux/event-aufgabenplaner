@@ -1,41 +1,36 @@
 import { useEffect, useState } from "react";
 
-export default function CostModal({ open, onClose, onCreate }) {
-  const [form, setForm] = useState({
-    title: "",
-    category: "",
-    amount: ""
-  });
+const blank = { title: "", category: "", amount: "", note: "", taskId: "" };
+
+export default function CostModal({ open, cost, eventId, tasks, onClose, onSave }) {
+  const [form, setForm] = useState(blank);
   const [saving, setSaving] = useState(false);
-  const [submitError, setSubmitError] = useState(null);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    if (open) setSubmitError(null);
-  }, [open]);
+    if (open) {
+      setForm(cost ? { ...blank, ...cost } : blank);
+      setError("");
+    }
+  }, [open, cost]);
 
   if (!open) return null;
 
-  function update(event) {
-    const { name, value } = event.target;
-    setForm((current) => ({ ...current, [name]: value }));
-  }
+  const update = (event) => setForm((current) => ({
+    ...current,
+    [event.target.name]: event.target.value
+  }));
 
   async function submit(event) {
     event.preventDefault();
-    if (saving || !form.title.trim() || !form.amount) return;
-
+    if (!form.title.trim() || !form.amount || saving) return;
     setSaving(true);
-    setSubmitError(null);
+    setError("");
     try {
-      await onCreate({
-        title: form.title.trim(),
-        category: form.category.trim() || "Sonstiges",
-        amount: Number(form.amount)
-      });
-      setForm({ title: "", category: "", amount: "" });
+      await onSave({ ...form, id: cost?.id, eventId, title: form.title.trim(), amount: Number(form.amount) });
       onClose();
     } catch (requestError) {
-      setSubmitError(requestError.message);
+      setError(requestError.message);
     } finally {
       setSaving(false);
     }
@@ -47,31 +42,41 @@ export default function CostModal({ open, onClose, onCreate }) {
         <div className="modal-header">
           <div>
             <span className="eyebrow">Kosten</span>
-            <h2>Kosten erfassen</h2>
+            <h2>{cost ? "Kosten bearbeiten" : "Kosten erfassen"}</h2>
           </div>
           <button className="icon-button" type="button" onClick={onClose} disabled={saving}>×</button>
         </div>
 
         <form className="form-grid" onSubmit={submit}>
+          {error ? <div className="form-error full">{error}</div> : null}
           <label className="field full">
             <span>Position</span>
-            <input name="title" value={form.title} onChange={update} placeholder="z. B. Catering" autoFocus disabled={saving} />
+            <input name="title" value={form.title} onChange={update} disabled={saving} />
           </label>
-
           <label className="field">
             <span>Kategorie</span>
-            <input name="category" value={form.category} onChange={update} placeholder="Verpflegung" disabled={saving} />
+            <input name="category" value={form.category} onChange={update} disabled={saving} />
           </label>
-
           <label className="field">
-            <span>Betrag in €</span>
-            <input type="number" min="0" step="0.01" name="amount" value={form.amount} onChange={update} disabled={saving} />
+            <span>Betrag</span>
+            <input type="number" step=".01" min="0" name="amount" value={form.amount} onChange={update} disabled={saving} />
           </label>
-
+          <label className="field full">
+            <span>Mit Aufgabe verknüpfen</span>
+            <select name="taskId" value={form.taskId || ""} onChange={update} disabled={saving}>
+              <option value="">Keine Aufgabe verknüpft</option>
+              {tasks.map((task) => (
+                <option key={task.id} value={task.id}>{task.key} · {task.title}</option>
+              ))}
+            </select>
+          </label>
+          <label className="field full">
+            <span>Notiz</span>
+            <textarea rows="3" name="note" value={form.note} onChange={update} disabled={saving} />
+          </label>
           <div className="modal-actions full">
-            {submitError ? <p role="alert">{submitError}</p> : null}
-            <button className="button secondary" type="button" onClick={onClose} disabled={saving}>Abbrechen</button>
-            <button className="button primary" type="submit" disabled={saving}>{saving ? "Speichern …" : "Speichern"}</button>
+            <button type="button" className="button secondary" onClick={onClose} disabled={saving}>Abbrechen</button>
+            <button className="button primary" disabled={saving}>{saving ? "Speichern …" : "Speichern"}</button>
           </div>
         </form>
       </section>

@@ -4,6 +4,14 @@ import { api } from "../services/api";
 const emptyResources = { tasks: [], costs: [], members: [], comments: [] };
 const AppDataContext = createContext(null);
 
+function normalizeEvent(event) {
+  return { ...event, startDate: event.startDate || event.date, endDate: event.endDate || event.date, createdBy: event.createdBy || "api-user", individualIds: event.individualIds || [], teamIds: event.teamIds || [] };
+}
+
+function normalizeTask(task) {
+  return { ...task, key: task.key || `TASK-${String(task.id).slice(0, 8).toUpperCase()}`, assigneeId: task.assigneeId || task.owner || "" };
+}
+
 export function AppDataProvider({ children }) {
   const [events, setEvents] = useState([]);
   const [selectedEventId, setSelectedEventId] = useState(null);
@@ -17,7 +25,7 @@ export function AppDataProvider({ children }) {
     setError(null);
     setReloadToken((current) => current + 1);
     try {
-      const nextEvents = await api.getEvents();
+      const nextEvents = (await api.getEvents()).map(normalizeEvent);
       setEvents(nextEvents);
       setSelectedEventId((currentId) =>
         currentId && nextEvents.some((item) => item.id === currentId)
@@ -49,7 +57,7 @@ export function AppDataProvider({ children }) {
       api.getComments(selectedEventId)
     ])
       .then(([tasks, members, costs, comments]) => {
-        if (active) setResources({ tasks, members, costs, comments });
+        if (active) setResources({ tasks: tasks.map(normalizeTask), members, costs, comments });
       })
       .catch((requestError) => { if (active) setError(requestError.message); })
       .finally(() => { if (active) setLoading(false); });
@@ -62,10 +70,14 @@ export function AppDataProvider({ children }) {
   const saveEvent = useCallback(async (event) => {
     setError(null);
     try {
-      const payload = { name: event.name, date: event.date, participants: event.participants };
-      const savedEvent = events.some((item) => item.id === event.id)
+      const payload = {
+        name: event.name,
+        date: event.date || event.startDate,
+        participants: event.participants ?? 0
+      };
+      const savedEvent = normalizeEvent(events.some((item) => item.id === event.id)
         ? await api.updateEvent(event.id, payload)
-        : await api.createEvent({ id: event.id, ...payload });
+        : await api.createEvent({ id: event.id, ...payload }));
       setEvents((current) => {
         const exists = current.some((item) => item.id === savedEvent.id);
         return exists
@@ -90,8 +102,14 @@ export function AppDataProvider({ children }) {
     if (!selectedEventId) return;
     setError(null);
     try {
-      const createdTask = await api.createTask(selectedEventId, { ...task, dueDate: task.dueDate || null });
-      setResources((current) => ({ ...current, tasks: [createdTask, ...current.tasks] }));
+      const createdTask = await api.createTask(selectedEventId, {
+        title: task.title,
+        status: task.status,
+        priority: task.priority,
+        owner: task.owner || task.assigneeId || null,
+        dueDate: task.dueDate || null
+      });
+      setResources((current) => ({ ...current, tasks: [normalizeTask(createdTask), ...current.tasks] }));
     } catch (requestError) { setError(requestError.message); throw requestError; }
   }, [selectedEventId]);
 
@@ -99,10 +117,15 @@ export function AppDataProvider({ children }) {
     setError(null);
     try {
       const updatedTask = await api.updateTask(id, {
-        ...changes,
+        ...(changes.title !== undefined ? { title: changes.title } : {}),
+        ...(changes.status !== undefined ? { status: changes.status } : {}),
+        ...(changes.priority !== undefined ? { priority: changes.priority } : {}),
+        ...(changes.owner !== undefined || changes.assigneeId !== undefined
+          ? { owner: changes.owner || changes.assigneeId || null }
+          : {}),
         ...(Object.hasOwn(changes, "dueDate") ? { dueDate: changes.dueDate || null } : {})
       });
-      setResources((current) => ({ ...current, tasks: current.tasks.map((task) => task.id === id ? updatedTask : task) }));
+      setResources((current) => ({ ...current, tasks: current.tasks.map((task) => task.id === id ? normalizeTask(updatedTask) : task) }));
     } catch (requestError) { setError(requestError.message); throw requestError; }
   }, []);
 
@@ -157,6 +180,49 @@ export function AppDataProvider({ children }) {
     } catch (requestError) { setError(requestError.message); throw requestError; }
   }, [selectedEventId]);
 
+  const currentUser = { id: "api-user", name: "Event-Team", email: "" };
+  const currentPerson = { id: "api-user", name: currentUser.name, email: currentUser.email };
+  const people = resources.members;
+  const accounts = [currentUser];
+  const teams = [];
+  const notifications = [];
+  const taskMessages = resources.comments;
+  const eventPeople = useCallback((eventId) => (
+    eventId === selectedEventId ? resources.members : []
+  ), [resources.members, selectedEventId]);
+  const canAccessEvent = useCallback(() => true, []);
+  const canEditEvent = useCallback(() => true, []);
+  const saveTask = useCallback(async (task) => {
+    if (task.id) return updateTask(task.id, task);
+    return addTask(task);
+  }, [addTask, updateTask]);
+  const saveCost = useCallback(async (cost) => {
+    if (!cost.id) return addCost(cost);
+    setError(null);
+    try {
+      const updatedCost = await api.updateCost(cost.id, { title: cost.title, category: cost.category, amount: cost.amount });
+      setResources((current) => ({ ...current, costs: current.costs.map((item) => item.id === cost.id ? updatedCost : item) }));
+    } catch (requestError) {
+      setError(requestError.message);
+      throw requestError;
+    }
+  }, [addCost]);
+  const savePerson = useCallback(async (person) => addMember({
+    name: person.name,
+    projectRole: person.email || null,
+    accessRole: "Bearbeiter"
+  }), [addMember]);
+  const deleteEvent = clearAll;
+  const deletePerson = deleteMember;
+  const deleteTeam = async () => {};
+  const saveTeam = async () => {};
+  const login = async () => {};
+  const register = async () => {};
+  const logout = () => {};
+  const markNotificationsRead = () => {};
+  const updateSettings = async () => {};
+  const addTaskMessage = useCallback(async (message) => addComment(message.text), [addComment]);
+
   const value = useMemo(() => ({
     events,
     event: selectedEvent,
@@ -177,7 +243,11 @@ export function AppDataProvider({ children }) {
     deleteMember,
     addComment,
     clearAll
-  }), [events, selectedEvent, selectedEventId, resources, loading, error, loadEvents, saveEvent, addTask, updateTask, deleteTask, addCost, deleteCost, addMember, deleteMember, addComment, clearAll]);
+    , currentUser, currentPerson, people, accounts, teams, notifications, taskMessages,
+    eventPeople, canAccessEvent, canEditEvent, saveTask, saveCost, savePerson,
+    deleteEvent, deletePerson, deleteTeam, saveTeam, login, register, logout,
+    markNotificationsRead, updateSettings, addTaskMessage
+  }), [events, selectedEvent, selectedEventId, resources, loading, error, loadEvents, saveEvent, addTask, updateTask, deleteTask, addCost, deleteCost, addMember, deleteMember, addComment, clearAll, currentUser, currentPerson, people, accounts, teams, notifications, taskMessages, eventPeople, canAccessEvent, canEditEvent, saveTask, saveCost, savePerson, deleteEvent, deletePerson, deleteTeam, saveTeam, addTaskMessage]);
 
   return <AppDataContext.Provider value={value}>{children}</AppDataContext.Provider>;
 }
