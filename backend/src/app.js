@@ -9,7 +9,14 @@ import { errorHandler, notFound } from "./middleware/errorHandler.js";
 export const app = express();
 
 app.use(helmet());
-app.use(cors({ origin: config.frontendUrl }));
+app.use(cors({
+  origin(origin, callback) {
+    if (!origin || config.frontendUrls.includes(origin)) {
+      return callback(null, true);
+    }
+    return callback(new Error("CORS origin not allowed."));
+  }
+}));
 app.use(express.json({ limit: "1mb" }));
 
 app.get("/api/health", (_req, res) => res.json({ status: "ok", service: "event-aufgabenplaner-api" }));

@@ -15,9 +15,7 @@ Im Browser können aktuell angelegt bzw. geändert werden:
 - Mitglieder hinzufügen und löschen
 - Rollen vergeben
 
-Die Daten werden vorübergehend im `localStorage` des Browsers gespeichert. Dadurch bleiben sie nach einem Neuladen erhalten.
-
-Sobald das Backend verfügbar ist, wird diese lokale Speicherung durch REST-API-Aufrufe ersetzt.
+Die Daten werden über die REST-API des Backends geladen und gespeichert. Das Backend verwendet PostgreSQL als primäre Datenquelle.
 
 ## Start
 
@@ -26,18 +24,12 @@ npm install
 npm run dev
 ```
 
-## Lokale Daten löschen
+## Backend-Verbindung
 
-Unter **Events → Projektdaten zurücksetzen** können alle lokal gespeicherten Testdaten entfernt werden.
-
-Alternativ im Browser die Local-Storage-Daten für die Seite löschen.
-
-## Backend-Vorbereitung
-
-Die Datei `src/services/api.js` enthält bereits eine vorbereitete API-Schicht.
+Die Datei `src/services/api.js` enthält die API-Schicht. Für die lokale Entwicklung wird `VITE_API_URL` aus `.env` verwendet.
 
 `.env.example`:
 
 ```env
-VITE_API_URL=http://localhost:3000/api
+VITE_API_URL=https://event-aufgabenplaner-production.up.railway.app/api
 ```
