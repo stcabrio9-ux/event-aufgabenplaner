@@ -6,11 +6,19 @@ import { useAppData } from "../state/AppDataContext";
 import { formatDate } from "../utils/format";
 
 export default function EventsPage() {
-  const { event, tasks, updateEvent, clearAll } = useAppData();
+  const { events, event, selectedEventId, selectEvent, tasks, updateEvent, clearAll } = useAppData();
   const [open, setOpen] = useState(false);
 
   const done = tasks.filter((task) => task.status === "Erledigt").length;
   const progress = tasks.length ? Math.round((done / tasks.length) * 100) : 0;
+
+  function deleteEvent() {
+    const confirmed = window.confirm(
+      `Möchtest du das Event "${event?.name ?? ""}" wirklich dauerhaft löschen?\n\n` +
+      "Dabei werden auch alle Aufgaben, Mitglieder, Kosten und Kommentare gelöscht. Dieser Vorgang kann nicht rückgängig gemacht werden."
+    );
+    if (confirmed) void clearAll().catch(() => {});
+  }
 
   return (
     <>
@@ -33,8 +41,13 @@ export default function EventsPage() {
                 <span className="eyebrow">Aktives Event</span>
                 <h2>{event.name}</h2>
               </div>
-              <button className="link-button danger" type="button" onClick={clearAll}>
-                Projektdaten zurücksetzen
+              {events.length > 1 ? (
+                <select aria-label="Event auswählen" value={selectedEventId ?? ""} onChange={(inputEvent) => selectEvent(inputEvent.target.value)}>
+                    {events.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
+                </select>
+              ) : null}
+              <button className="link-button danger" type="button" onClick={deleteEvent}>
+                Event dauerhaft löschen
               </button>
             </div>
 

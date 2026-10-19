@@ -105,7 +105,7 @@ export default function DashboardPage() {
             {tasks.length ? (
               <TaskTable
                 tasks={tasks.slice(0, 6)}
-                onStatusChange={(id, status) => updateTask(id, { status })}
+                onStatusChange={(id, status) => void updateTask(id, { status }).catch(() => {})}
                 onDelete={deleteTask}
               />
             ) : (

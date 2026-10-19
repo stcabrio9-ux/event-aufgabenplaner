@@ -4,13 +4,23 @@ import { useAppData } from "../state/AppDataContext";
 export default function CommentCard() {
   const { comments, addComment } = useAppData();
   const [value, setValue] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [submitError, setSubmitError] = useState(null);
 
-  function submit(event) {
+  async function submit(event) {
     event.preventDefault();
     const text = value.trim();
-    if (!text) return;
-    addComment(text);
-    setValue("");
+    if (saving || !text) return;
+    setSaving(true);
+    setSubmitError(null);
+    try {
+      await addComment(text);
+      setValue("");
+    } catch (requestError) {
+      setSubmitError(requestError.message);
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (
@@ -39,9 +49,11 @@ export default function CommentCard() {
           placeholder="Kommentar schreiben ..."
           value={value}
           onChange={(event) => setValue(event.target.value)}
+          disabled={saving}
         />
-        <button className="button secondary" type="submit">Senden</button>
+        <button className="button secondary" type="submit" disabled={saving}>{saving ? "Senden …" : "Senden"}</button>
       </form>
+      {submitError ? <p role="alert">{submitError}</p> : null}
     </section>
   );
 }

@@ -54,7 +54,11 @@ export default function CostsPage() {
                         <td>{cost.category}</td>
                         <td>{formatMoney(cost.amount)}</td>
                         <td className="table-actions">
-                          <button className="link-button danger" type="button" onClick={() => deleteCost(cost.id)}>Löschen</button>
+                          <button className="link-button danger" type="button" onClick={() => {
+                            if (window.confirm(`Möchtest du die Kostenposition „${cost.title}" wirklich löschen?`)) {
+                              void deleteCost(cost.id).catch(() => {});
+                            }
+                          }}>Löschen</button>
                         </td>
                       </tr>
                     ))}

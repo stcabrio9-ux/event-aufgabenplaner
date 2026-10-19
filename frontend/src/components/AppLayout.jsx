@@ -11,7 +11,7 @@ const navigation = [
 ];
 
 export default function AppLayout() {
-  const { event, tasks } = useAppData();
+  const { event, tasks, loading, error, reload } = useAppData();
 
   const completed = tasks.filter((task) => task.status === "Erledigt").length;
   const progress = tasks.length ? Math.round((completed / tasks.length) * 100) : 0;
@@ -66,6 +66,12 @@ export default function AppLayout() {
         </aside>
 
         <div className="content">
+          {loading ? <p role="status">Daten werden geladen …</p> : null}
+          {error ? (
+            <p role="alert">
+              {error} <button type="button" onClick={reload}>Erneut versuchen</button>
+            </p>
+          ) : null}
           <Outlet />
         </div>
       </div>
