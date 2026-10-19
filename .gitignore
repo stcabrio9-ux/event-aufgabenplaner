@@ -1,2 +1,8 @@
 .DS_Store
 .idea/
+
+frontend/node_modules/
+frontend/.vite/
+frontend/dist/
+.DS_Store
+.idea/
