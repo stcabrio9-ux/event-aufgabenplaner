@@ -19,6 +19,12 @@ export function AppDataProvider({ children }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [reloadToken, setReloadToken] = useState(0);
+  const [currentUser, setCurrentUser] = useState(null);
+
+  useEffect(() => {
+    if (!sessionStorage.getItem("event-planner-auth-token")) return;
+    api.getCurrentUser().then(({ user }) => setCurrentUser(user)).catch(() => sessionStorage.removeItem("event-planner-auth-token"));
+  }, []);
 
   const loadEvents = useCallback(async () => {
     setLoading(true);
@@ -180,10 +186,9 @@ export function AppDataProvider({ children }) {
     } catch (requestError) { setError(requestError.message); throw requestError; }
   }, [selectedEventId]);
 
-  const currentUser = { id: "api-user", name: "Event-Team", email: "" };
-  const currentPerson = { id: "api-user", name: currentUser.name, email: currentUser.email };
+  const currentPerson = currentUser ? { id: currentUser.id, name: currentUser.name, email: currentUser.email } : null;
   const people = resources.members;
-  const accounts = [currentUser];
+  const accounts = currentUser ? [currentUser] : [];
   const teams = [];
   const notifications = [];
   const taskMessages = resources.comments;
@@ -216,9 +221,13 @@ export function AppDataProvider({ children }) {
   const deletePerson = deleteMember;
   const deleteTeam = async () => {};
   const saveTeam = async () => {};
-  const login = async () => {};
-  const register = async () => {};
-  const logout = () => {};
+  const login = useCallback(async (credentials) => {
+    const user = await api.login(credentials);
+    setCurrentUser(user);
+    return user;
+  }, []);
+  const register = async () => { throw new Error("Registrierung ist im Prototyp nicht aktiviert."); };
+  const logout = useCallback(async () => { await api.logout(); setCurrentUser(null); }, []);
   const markNotificationsRead = () => {};
   const updateSettings = async () => {};
   const addTaskMessage = useCallback(async (message) => addComment(message.text), [addComment]);
@@ -247,7 +256,7 @@ export function AppDataProvider({ children }) {
     eventPeople, canAccessEvent, canEditEvent, saveTask, saveCost, savePerson,
     deleteEvent, deletePerson, deleteTeam, saveTeam, login, register, logout,
     markNotificationsRead, updateSettings, addTaskMessage
-  }), [events, selectedEvent, selectedEventId, resources, loading, error, loadEvents, saveEvent, addTask, updateTask, deleteTask, addCost, deleteCost, addMember, deleteMember, addComment, clearAll, currentUser, currentPerson, people, accounts, teams, notifications, taskMessages, eventPeople, canAccessEvent, canEditEvent, saveTask, saveCost, savePerson, deleteEvent, deletePerson, deleteTeam, saveTeam, addTaskMessage]);
+  }), [events, selectedEvent, selectedEventId, resources, loading, error, loadEvents, saveEvent, addTask, updateTask, deleteTask, addCost, deleteCost, addMember, deleteMember, addComment, clearAll, currentUser, currentPerson, people, accounts, teams, notifications, taskMessages, eventPeople, canAccessEvent, canEditEvent, saveTask, saveCost, savePerson, deleteEvent, deletePerson, deleteTeam, saveTeam, login, register, logout, addTaskMessage]);
 
   return <AppDataContext.Provider value={value}>{children}</AppDataContext.Provider>;
 }

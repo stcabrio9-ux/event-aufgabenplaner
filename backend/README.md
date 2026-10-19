@@ -26,6 +26,9 @@ Für einen normalen Start: `npm start`. Die API läuft standardmäßig auf `http
 ## Endpunkte
 
 - `GET /api/health`
+- `POST /api/auth/login`
+- `GET /api/auth/me`
+- `POST /api/auth/logout`
 - `GET|POST /api/events`
 - `GET|PATCH|DELETE /api/events/:id`
 - `GET|POST /api/events/:eventId/tasks`
@@ -41,6 +44,8 @@ Statuswerte sind `Offen`, `In Bearbeitung` und `Erledigt`; Prioritäten `Niedrig
 ## Railway
 
 Ein Railway-PostgreSQL-Service stellt `DATABASE_URL` bereit. Diese Variable zusammen mit `NODE_ENV=production`, `PORT` (falls Railway ihn vorgibt) und `FRONTEND_URL` im Backend-Service konfigurieren. Anschließend im Deploy- oder Release-Schritt `npm run migrate` ausführen und als Startkommando `npm start` verwenden. In Produktion aktiviert der Pool TLS für PostgreSQL.
+
+Für die Prototyp-Anmeldung zusätzlich `AUTH_SECRET`, `ADMIN_EMAIL`, `ADMIN_PASSWORD` und optional `ADMIN_NAME` als Railway-Variablen setzen. Nach der Migration einmal `npm run seed-admin` als Release-/Deploy-Schritt ausführen. Das Passwort wird dabei nur gehasht in PostgreSQL gespeichert.
 
 ## Tests
 

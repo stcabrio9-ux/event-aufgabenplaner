@@ -1,9 +1,11 @@
 const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:3000/api";
 
 async function request(path, options = {}) {
+  const token = sessionStorage.getItem("event-planner-auth-token");
   const response = await fetch(`${API_URL}${path}`, {
     headers: {
       "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...(options.headers ?? {})
     },
     ...options
@@ -33,6 +35,16 @@ async function request(path, options = {}) {
 }
 
 export const api = {
+  login: async (credentials) => {
+    const result = await request("/auth/login", { method: "POST", body: JSON.stringify(credentials) });
+    sessionStorage.setItem("event-planner-auth-token", result.token);
+    return result.user;
+  },
+  getCurrentUser: () => request("/auth/me"),
+  logout: async () => {
+    try { await request("/auth/logout", { method: "POST" }); }
+    finally { sessionStorage.removeItem("event-planner-auth-token"); }
+  },
   getEvents: () => request("/events"),
   getEvent: (id) => request(`/events/${id}`),
   createEvent: (payload) =>

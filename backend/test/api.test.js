@@ -2,6 +2,20 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import request from "supertest";
 import { app } from "../src/app.js";
+import { hashPassword, verifyPassword } from "../src/services/auth.js";
+
+test("Passwörter werden gehasht und nur mit dem richtigen Passwort verifiziert", async () => {
+  const hash = await hashPassword("correct horse battery staple");
+  assert.notEqual(hash, "correct horse battery staple");
+  assert.equal(await verifyPassword("correct horse battery staple", hash), true);
+  assert.equal(await verifyPassword("wrong password", hash), false);
+});
+
+test("Login validiert fehlende Zugangsdaten ohne Datenbankzugriff", async () => {
+  const response = await request(app).post("/api/auth/login").send({ email: "not-an-email" });
+  assert.equal(response.status, 400);
+  assert.equal(response.body.error.code, "VALIDATION_ERROR");
+});
 
 test("GET /api/health liefert den API-Status", async () => {
   const response = await request(app).get("/api/health");

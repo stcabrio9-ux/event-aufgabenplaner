@@ -6,6 +6,7 @@ const idParams = z.object({ id: uuid });
 const eventIdParams = z.object({ eventId: uuid });
 
 export const schemas = {
+  authLogin: z.object({ email: z.string().trim().email(), password: z.string().min(1) }),
   idParams,
   eventIdParams,
   eventCreate: z.object({ id: uuid.optional(), name: z.string().trim().min(1).max(160), date, participants: z.coerce.number().int().min(0).default(0) }),

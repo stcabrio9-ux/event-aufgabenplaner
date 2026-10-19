@@ -4,7 +4,11 @@ export const config = {
   port: Number(process.env.PORT || 3000),
   nodeEnv: process.env.NODE_ENV || "development",
   databaseUrl: process.env.DATABASE_URL,
-  frontendUrl: process.env.FRONTEND_URL || "http://localhost:5173"
+  frontendUrl: process.env.FRONTEND_URL || "http://localhost:5173",
+  authSecret: process.env.AUTH_SECRET,
+  adminEmail: process.env.ADMIN_EMAIL,
+  adminPassword: process.env.ADMIN_PASSWORD,
+  adminName: process.env.ADMIN_NAME || "Administrator"
 };
 
 export function validateDatabaseUrl() {

@@ -7,7 +7,8 @@
     "start": "node src/server.js",
     "dev": "node --watch src/server.js",
     "test": "node --test test/api.test.js",
-    "migrate": "node src/database/migrate.js"
+    "migrate": "node src/database/migrate.js",
+    "seed-admin": "node src/database/seed-admin.js"
   },
   "dependencies": {
     "cors": "^2.8.5",
