@@ -26,7 +26,7 @@ export default function TaskDetailPage() {
   const [email, setEmail] = useState("");
   const [emailText, setEmailText] = useState("");
 
-  if (!task) return loading ? <main className="page-content">Aufgabe wird geladen …</main> : <Navigate to="../tasks" replace />;
+  if (!task) return <main className="page-content">Aufgabe wird geladen …</main>;
 
   const allowed = eventPeople(event.id);
   const messages = taskMessages.filter((message) => message.taskId === taskId);
