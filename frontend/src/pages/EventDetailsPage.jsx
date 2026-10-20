@@ -17,12 +17,13 @@ export default function EventDetailsPage() {
     deleteEvent,
     eventPeople,
     canEditEvent,
-    canAccessEvent
+    canAccessEvent,
+    loading
   } = useAppData();
   const [edit, setEdit] = useState(false);
 
   const event = events.find((item) => item.id === eventId);
-  if (!event) return <Navigate to="/events" replace />;
+  if (!event) return loading ? <main className="page-content">Event wird geladen …</main> : <Navigate to="/events" replace />;
 
   const members = eventPeople(eventId);
   const owner = accounts.find((account) => account.id === event.createdBy);

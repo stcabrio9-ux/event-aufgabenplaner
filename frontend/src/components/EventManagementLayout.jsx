@@ -5,10 +5,10 @@ import { formatDateRange } from "../utils/format";
 
 export default function EventManagementLayout() {
   const { eventId } = useParams();
-  const { events, tasks, canAccessEvent, isAdmin } = useAppData();
+  const { events, tasks, canAccessEvent, isAdmin, loading } = useAppData();
   const event = events.find((item) => item.id === eventId);
 
-  if (!event) return <Navigate to="/events" replace />;
+  if (!event) return loading ? <main className="page-content">Event wird geladen …</main> : <Navigate to="/events" replace />;
   if (!canAccessEvent(eventId)) return <Navigate to={`/events/${eventId}`} replace />;
 
   const eventTasks = tasks.filter((task) => task.eventId === eventId);
