@@ -15,7 +15,8 @@ export default function TaskDetailPage() {
     eventPeople,
     taskMessages,
     saveTask,
-    addTaskMessage
+    addTaskMessage,
+    loading
   } = useAppData();
 
   const task = tasks.find((item) => item.id === taskId && item.eventId === event.id);
@@ -25,7 +26,7 @@ export default function TaskDetailPage() {
   const [email, setEmail] = useState("");
   const [emailText, setEmailText] = useState("");
 
-  if (!task) return <Navigate to="../tasks" replace />;
+  if (!task) return loading ? <main className="page-content">Aufgabe wird geladen …</main> : <Navigate to="../tasks" replace />;
 
   const allowed = eventPeople(event.id);
   const messages = taskMessages.filter((message) => message.taskId === taskId);
