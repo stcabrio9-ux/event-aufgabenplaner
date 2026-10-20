@@ -18,6 +18,7 @@ export function AppDataProvider({ children }) {
   const [people, setPeople] = useState([]);
   const [teams, setTeams] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [authLoading, setAuthLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
 
@@ -39,8 +40,8 @@ export function AppDataProvider({ children }) {
   }, [refreshOrganisation]);
 
   useEffect(() => {
-    if (!sessionStorage.getItem("event-planner-auth-token")) { setLoading(false); return undefined; }
-    api.getCurrentUser().then(({ user }) => setCurrentUser(user)).catch(() => sessionStorage.removeItem("event-planner-auth-token"));
+    if (!sessionStorage.getItem("event-planner-auth-token")) { setAuthLoading(false); setLoading(false); return undefined; }
+    api.getCurrentUser().then(({ user }) => setCurrentUser(user)).catch(() => sessionStorage.removeItem("event-planner-auth-token")).finally(() => setAuthLoading(false));
     return undefined;
   }, []);
   useEffect(() => { loadEvents(); }, [loadEvents]);
@@ -92,7 +93,7 @@ export function AppDataProvider({ children }) {
   const eventPeople = useCallback((eventId) => eventId === selectedEventId ? resources.members : [], [resources.members, selectedEventId]);
   const canAccessEvent = useCallback((event) => Boolean(currentUser && (isAdmin || !event || event.createdBy === currentUser.id || event.individualIds?.includes(currentPerson?.id) || event.teamIds?.some((teamId) => teams.find((team) => team.id === teamId)?.memberIds?.includes(currentPerson?.id)))), [currentUser, isAdmin, currentPerson, teams]);
   const canEditEvent = useCallback(() => isAdmin, [isAdmin]);
-  const value = useMemo(() => ({ events, event: selectedEvent, selectedEventId, selectEvent: setSelectedEventId, ...resources, loading, error, reload: loadEvents, clearError: () => setError(null), saveEvent, updateEvent: saveEvent, addTask, updateTask, deleteTask, saveTask, addMember, addPerson: savePerson, deleteMember, addCost, saveCost, deleteCost, addComment, addTaskMessage, deleteEvent, clearAll: deleteEvent, currentUser, currentPerson, isAdmin, people, accounts, teams, notifications: [], taskMessages: resources.comments, eventPeople, canAccessEvent, canEditEvent, savePerson, deletePerson, saveTeam, deleteTeam, login, logout, register: async () => { throw new Error("Registrierung ist nicht aktiviert."); }, markNotificationsRead: () => {}, updateSettings: async () => {} }), [events, selectedEvent, selectedEventId, resources, loading, error, loadEvents, saveEvent, addTask, updateTask, deleteTask, saveTask, addMember, savePerson, deleteMember, addCost, saveCost, deleteCost, addComment, addTaskMessage, deleteEvent, currentUser, currentPerson, isAdmin, people, accounts, teams, eventPeople, canAccessEvent, canEditEvent, deletePerson, saveTeam, deleteTeam, login, logout]);
+  const value = useMemo(() => ({ events, event: selectedEvent, selectedEventId, selectEvent: setSelectedEventId, ...resources, loading, authLoading, error, reload: loadEvents, clearError: () => setError(null), saveEvent, updateEvent: saveEvent, addTask, updateTask, deleteTask, saveTask, addMember, addPerson: savePerson, deleteMember, addCost, saveCost, deleteCost, addComment, addTaskMessage, deleteEvent, clearAll: deleteEvent, currentUser, currentPerson, isAdmin, people, accounts, teams, notifications: [], taskMessages: resources.comments, eventPeople, canAccessEvent, canEditEvent, savePerson, deletePerson, saveTeam, deleteTeam, login, logout, register: async () => { throw new Error("Registrierung ist nicht aktiviert."); }, markNotificationsRead: () => {}, updateSettings: async () => {} }), [events, selectedEvent, selectedEventId, resources, loading, authLoading, error, loadEvents, saveEvent, addTask, updateTask, deleteTask, saveTask, addMember, savePerson, deleteMember, addCost, saveCost, deleteCost, addComment, addTaskMessage, deleteEvent, currentUser, currentPerson, isAdmin, people, accounts, teams, eventPeople, canAccessEvent, canEditEvent, deletePerson, saveTeam, deleteTeam, login, logout]);
   return <AppDataContext.Provider value={value}>{children}</AppDataContext.Provider>;
 }
 export function useAppData() { const context = useContext(AppDataContext); if (!context) throw new Error("useAppData must be used inside AppDataProvider"); return context; }

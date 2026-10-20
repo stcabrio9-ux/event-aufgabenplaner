@@ -16,22 +16,23 @@ import CostsPage from "./pages/CostsPage";
 import EventPeoplePage from "./pages/EventPeoplePage";
 
 function RequireAuth({ children }) {
-  const { currentUser } = useAppData();
+  const { currentUser, authLoading } = useAppData();
   const location = useLocation();
 
+  if (authLoading) return <main className="page-content">Sitzung wird geladen …</main>;
   return currentUser
     ? children
     : <Navigate to="/login" replace state={{ from: location.pathname }} />;
 }
 
 export default function App() {
-  const { currentUser } = useAppData();
+  const { currentUser, authLoading } = useAppData();
 
   return (
     <Routes>
       <Route
         path="/login"
-        element={currentUser ? <Navigate to="/" replace /> : <AuthPage />}
+        element={authLoading ? <main className="page-content">Sitzung wird geladen …</main> : currentUser ? <Navigate to="/" replace /> : <AuthPage />}
       />
 
       <Route element={<SiteLayout />}>
