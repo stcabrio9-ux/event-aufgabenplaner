@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, Navigate, useLocation, useParams } from "react-router-dom";
 import EventModal from "../components/EventModal";
 import { useAppData } from "../state/AppDataContext";
@@ -18,11 +18,13 @@ export default function EventDetailsPage() {
     eventPeople,
     canEditEvent,
     canAccessEvent,
-    loading
+    loading,
+    selectEvent
   } = useAppData();
   const [edit, setEdit] = useState(false);
 
   const event = events.find((item) => item.id === eventId);
+  useEffect(() => { if (eventId) selectEvent(eventId); }, [eventId, selectEvent]);
   if (!event) return loading ? <main className="page-content">Event wird geladen …</main> : <Navigate to="/events" replace />;
 
   const members = eventPeople(eventId);

@@ -1,12 +1,14 @@
 import { NavLink, Outlet, useParams, Link, Navigate } from "react-router-dom";
+import { useEffect } from "react";
 import Topbar from "./Topbar";
 import { useAppData } from "../state/AppDataContext";
 import { formatDateRange } from "../utils/format";
 
 export default function EventManagementLayout() {
   const { eventId } = useParams();
-  const { events, tasks, canAccessEvent, isAdmin, loading } = useAppData();
+  const { events, tasks, canAccessEvent, isAdmin, loading, selectEvent } = useAppData();
   const event = events.find((item) => item.id === eventId);
+  useEffect(() => { if (eventId) selectEvent(eventId); }, [eventId, selectEvent]);
 
   if (!event) return loading ? <main className="page-content">Event wird geladen …</main> : <Navigate to="/events" replace />;
   if (!canAccessEvent(eventId)) return <Navigate to={`/events/${eventId}`} replace />;

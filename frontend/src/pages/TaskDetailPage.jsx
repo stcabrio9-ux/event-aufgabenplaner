@@ -79,6 +79,7 @@ export default function TaskDetailPage() {
     if (!text.trim()) return;
     addTaskMessage({
       taskId,
+      eventId: event.id,
       type: "comment",
       text: text.trim(),
       mentionIds: mentionIdsFromText(text),
@@ -93,6 +94,7 @@ export default function TaskDetailPage() {
     if (!email.trim() || !emailText.trim()) return;
     addTaskMessage({
       taskId,
+      eventId: event.id,
       type: "email_out",
       text: emailText.trim(),
       toEmail: email.trim(),
