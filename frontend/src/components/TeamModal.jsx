@@ -4,7 +4,7 @@ export default function TeamModal({open,team,people,onAddPerson,onClose,onSave})
   useEffect(()=>{if(open){setName(team?.name||"");setMemberIds(team?.memberIds||[]) }},[open,team]);
   if(!open)return null;
   const toggle=id=>setMemberIds(ids=>ids.includes(id)?ids.filter(x=>x!==id):[...ids,id]);
-  const addPerson=()=>{if(!person.name.trim()||!person.email.trim())return; const id=onAddPerson(person); setMemberIds(ids=>[...new Set([...ids,id])]); setPerson({name:"",email:""})};
+  const addPerson=async()=>{if(!person.name.trim()||!person.email.trim())return; const created=await onAddPerson(person); setMemberIds(ids=>[...new Set([...ids,created.id])]); setPerson({name:"",email:""})};
   return <div className="modal-backdrop"><section className="modal"><div className="modal-header"><div><span className="eyebrow">Teamverwaltung</span><h2>{team?"Team bearbeiten":"Team erstellen"}</h2></div><button className="icon-button" onClick={onClose}>×</button></div><div className="form-grid">
     <label className="field full"><span>Teamname</span><input value={name} onChange={e=>setName(e.target.value)} placeholder="z. B. Organisation"/></label>
     <div className="field full"><span>Mitglieder</span><div className="check-list">{people.map(p=><label key={p.id}><input type="checkbox" checked={memberIds.includes(p.id)} onChange={()=>toggle(p.id)}/>{p.name} <small>{p.email}</small></label>)}</div></div>

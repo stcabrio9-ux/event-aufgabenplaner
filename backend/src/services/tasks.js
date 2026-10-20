@@ -8,12 +8,12 @@ export async function listTasks(eventId) {
 }
 
 export async function createTask(eventId, data) {
-  const result = await query("INSERT INTO tasks (event_id, title, status, priority, owner, due_date) SELECT $1, $2, $3, $4, $5, $6 WHERE EXISTS (SELECT 1 FROM events WHERE id = $1) RETURNING *", [eventId, data.title, data.status, data.priority, data.owner ?? null, data.dueDate ?? null]);
+  const result = await query("INSERT INTO tasks (event_id, title, description, status, priority, owner, assignee_id, due_date) SELECT $1, $2, $3, $4, $5, $6, $7, $8 WHERE EXISTS (SELECT 1 FROM events WHERE id = $1) RETURNING *", [eventId, data.title, data.description ?? "", data.status, data.priority, data.owner ?? null, data.assigneeId ?? null, data.dueDate ?? null]);
   return taskRow(requireRow(result, "Event"));
 }
 
 export async function updateTask(id, data) {
-  const result = await query("UPDATE tasks SET title = COALESCE($2, title), status = COALESCE($3, status), priority = COALESCE($4, priority), owner = CASE WHEN $5::boolean THEN $6 ELSE owner END, due_date = CASE WHEN $7::boolean THEN $8::date ELSE due_date END, updated_at = now() WHERE id = $1 RETURNING *", [id, data.title ?? null, data.status ?? null, data.priority ?? null, Object.hasOwn(data, "owner"), data.owner ?? null, Object.hasOwn(data, "dueDate"), data.dueDate ?? null]);
+  const result = await query("UPDATE tasks SET title = COALESCE($2, title), description = COALESCE($3, description), status = COALESCE($4, status), priority = COALESCE($5, priority), owner = CASE WHEN $6::boolean THEN $7 ELSE owner END, assignee_id = CASE WHEN $8::boolean THEN $9::uuid ELSE assignee_id END, due_date = CASE WHEN $10::boolean THEN $11::date ELSE due_date END, updated_at = now() WHERE id = $1 RETURNING *", [id, data.title ?? null, data.description ?? null, data.status ?? null, data.priority ?? null, Object.hasOwn(data, "owner"), data.owner ?? null, Object.hasOwn(data, "assigneeId"), data.assigneeId ?? null, Object.hasOwn(data, "dueDate"), data.dueDate ?? null]);
   return taskRow(requireRow(result, "Aufgabe"));
 }
 

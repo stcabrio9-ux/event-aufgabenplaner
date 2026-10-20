@@ -98,5 +98,13 @@ export const api = {
     request(`/events/${eventId}/comments`, {
       method: "POST",
       body: JSON.stringify(payload)
-    })
+    }),
+  getPeople: () => request("/people"),
+  createPerson: (payload) => request("/people", { method: "POST", body: JSON.stringify(payload) }),
+  updatePerson: (id, payload) => request(`/people/${id}`, { method: "PATCH", body: JSON.stringify(payload) }),
+  deletePerson: (id) => request(`/people/${id}`, { method: "DELETE" }),
+  getTeams: () => request("/teams"),
+  createTeam: (payload) => request("/teams", { method: "POST", body: JSON.stringify(payload) }),
+  updateTeam: (id, payload) => request(`/teams/${id}`, { method: "PATCH", body: JSON.stringify(payload) }),
+  deleteTeam: (id) => request(`/teams/${id}`, { method: "DELETE" })
 };

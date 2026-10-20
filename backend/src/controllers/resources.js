@@ -2,6 +2,8 @@ import * as tasks from "../services/tasks.js";
 import * as members from "../services/members.js";
 import * as costs from "../services/costs.js";
 import * as comments from "../services/comments.js";
+import * as people from "../services/people.js";
+import * as teams from "../services/teams.js";
 
 export const taskList = async (req, res) => res.json(await tasks.listTasks(req.params.eventId));
 export const taskCreate = async (req, res) => res.status(201).json(await tasks.createTask(req.params.eventId, req.body));
@@ -15,4 +17,12 @@ export const costCreate = async (req, res) => res.status(201).json(await costs.c
 export const costUpdate = async (req, res) => res.json(await costs.updateCost(req.params.id, req.body));
 export const costDelete = async (req, res) => { await costs.deleteCost(req.params.id); res.status(204).send(); };
 export const commentList = async (req, res) => res.json(await comments.listComments(req.params.eventId));
-export const commentCreate = async (req, res) => res.status(201).json(await comments.createComment(req.params.eventId, req.body));
+export const commentCreate = async (req, res) => res.status(201).json(await comments.createComment(req.params.eventId, req.body, req.user));
+export const peopleList = async (_req, res) => res.json(await people.listPeople());
+export const personCreate = async (req, res) => res.status(201).json(await people.createPerson(req.body));
+export const personUpdate = async (req, res) => res.json(await people.updatePerson(req.params.id, req.body));
+export const personDelete = async (req, res) => { await people.deletePerson(req.params.id); res.status(204).send(); };
+export const teamList = async (_req, res) => res.json(await teams.listTeams());
+export const teamCreate = async (req, res) => res.status(201).json(await teams.createTeam(req.body, req.user.id));
+export const teamUpdate = async (req, res) => res.json(await teams.updateTeam(req.params.id, req.body));
+export const teamDelete = async (req, res) => { await teams.deleteTeam(req.params.id); res.status(204).send(); };
