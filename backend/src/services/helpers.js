@@ -6,12 +6,14 @@ export function requireRow(result, resource = "Ressource") {
 }
 
 export function eventRow(row) {
+  const dateOnly = (value) => value ? String(value instanceof Date ? value.toISOString() : value).slice(0, 10) : "";
   const jsonArray = (value) => Array.isArray(value) ? value : (typeof value === "string" ? JSON.parse(value) : []);
-  return { id: row.id, name: row.name, date: row.date, startDate: row.start_date || row.date, endDate: row.end_date || row.start_date || row.date, startTime: row.start_time ? String(row.start_time).slice(0, 5) : "", endTime: row.end_time ? String(row.end_time).slice(0, 5) : "", description: row.description || "", location: row.location || "", image: row.image || "", participants: row.participants, createdBy: row.created_by, teamIds: jsonArray(row.team_ids), individualIds: jsonArray(row.individual_ids) };
+  return { id: row.id, name: row.name, date: dateOnly(row.date), startDate: dateOnly(row.start_date || row.date), endDate: dateOnly(row.end_date || row.start_date || row.date), startTime: row.start_time ? String(row.start_time).slice(0, 5) : "", endTime: row.end_time ? String(row.end_time).slice(0, 5) : "", description: row.description || "", location: row.location || "", image: row.image || "", participants: row.participants, createdBy: row.created_by, teamIds: jsonArray(row.team_ids), individualIds: jsonArray(row.individual_ids) };
 }
 
 export function taskRow(row) {
-  return { id: row.id, eventId: row.event_id, title: row.title, description: row.description || "", status: row.status, priority: row.priority, owner: row.owner, assigneeId: row.assignee_id, dueDate: row.due_date };
+  const dueDate = row.due_date ? String(row.due_date instanceof Date ? row.due_date.toISOString() : row.due_date).slice(0, 10) : null;
+  return { id: row.id, eventId: row.event_id, title: row.title, description: row.description || "", status: row.status, priority: row.priority, owner: row.owner, assigneeId: row.assignee_id, dueDate };
 }
 
 export function memberRow(row) {
