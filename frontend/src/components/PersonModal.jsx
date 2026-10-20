@@ -44,11 +44,11 @@ export default function PersonModal({ open, person, onClose, onSave }) {
           {error ? <div className="form-error full">{error}</div> : null}
           <label className="field full">
             <span>Name</span>
-            <input value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} />
+            <input name="name" value={form.name} onChange={(event) => setForm((current) => ({ ...current, name: event.target.value }))} />
           </label>
           <label className="field full">
             <span>E-Mail-Adresse</span>
-            <input type="email" value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} />
+            <input name="email" type="email" value={form.email} onChange={(event) => setForm((current) => ({ ...current, email: event.target.value }))} />
           </label>
           <div className="modal-actions full">
             <button className="button secondary" type="button" onClick={onClose}>Abbrechen</button>
